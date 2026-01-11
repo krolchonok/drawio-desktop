@@ -7,13 +7,15 @@
     "!**/WEB-INF{,/**}"
   ],
   "directories": {
-    "output": "./dist/"
+    "output": "./build/"
   },
   "npmRebuild": false,
   "publish": {
       "provider": "github"
   },
   "win": {
+    "forceCodeSigning": false,
+    "signAndEditExecutable": false,
     "target": [
       {
           "target": "nsis",
