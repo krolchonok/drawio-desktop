@@ -20,7 +20,7 @@ jobs:
     - name: Checkout drawio-dev
       uses: actions/checkout@v4
       with:
-        repository: jgraph/drawio-dev
+        repository: krolchonok/drawio-dev
         token: ${{ secrets.GITHUB_TOKEN }}
         ref: release
         path: drawio-dev
