@@ -56,23 +56,20 @@ jobs:
     - name: Installing Node
       uses: actions/setup-node@v4
       with:
-        node-version: 22
+        node-version: 24
     - name: Build for ${{ matrix.os}}
       run: |
         if [ "$OS_NAME" = "ubuntu-latest" ]; then sudo apt-get update && sudo apt-get install -y icnsutils graphicsmagick xz-utils rpm; fi
-        curl -o- -L https://yarnpkg.com/install.sh | bash
-        export PATH="$HOME/.yarn/bin:$PATH"
         git config --global url."https://github.com/".insteadOf "git@github.com:"
-        sudo npm install -g yarn
-        yarn install
+        npm ci
         if [ "$OS_NAME" = "ubuntu-latest" ]; then sed -ie 's/"asar": true,/"asar": true,\n"productName": "drawio",/' electron-builder-linux-mac.json; fi 
-        yarn run sync
-        yarn run release-linux
+        npm run sync
+        npm run release-linux
     - name: Build for Snap
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
         #To generate SNAP_TOKEN run `snapcraft export-login [FILE]` and login with your snapcraft credentials. It is used now without login
         sudo snap install snapcraft --classic
-        yarn run release-snap
+        npm run release-snap
         # Cannot configure electron-builder to publish to stable channel, so do it explicitly
         snapcraft push --release edge dist/draw.io-amd64-*.snap

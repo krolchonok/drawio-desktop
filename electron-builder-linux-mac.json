@@ -1,6 +1,6 @@
 {
   "appId": "com.jgraph.drawio.desktop",
-  "copyright": "Copyright 2017-2019 draw.io",
+  "copyright": "Copyright 2017-20126 draw.io Ltd",
   "asar": true,
   "files": [
     "**/*",
@@ -41,8 +41,13 @@
   "linux": {
   	"executableName": "drawio",
     "category": "Graphics",
-    "maintainer": "JGraph <support@draw.io>",
+    "maintainer": "draw.io <desktop@draw.io>",
     "icon": "./build",
+    "desktop": {
+      "entry": {
+        "StartupWMClass": "draw.io"
+      }
+    },
     "target": [
       { "target": "AppImage", "arch": [
           "x64",

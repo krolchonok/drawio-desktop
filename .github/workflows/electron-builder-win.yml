@@ -43,37 +43,36 @@ jobs:
     - name: Installing Node
       uses: actions/setup-node@v4
       with:
-        node-version: 22
+        node-version: 24
     - name: Prepare for Windows Build
-      shell: powershell #The default shell for Windows
+      shell: powershell
       run: |
         git config --global url."https://github.com/".insteadOf "git@github.com:"
-        npm install -g yarn
-        yarn install
+        npm ci
     - name: Build for Windows (x32 & arm64)
       env:
         CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
         CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
-      shell: powershell #The default shell for Windows
+      shell: powershell
       run: |
         #Disable auto-update and build 32bit/arm64 first such that latest.yml is for 64bit only (64bit will overwrite 32bit one)
-        yarn run sync disableUpdate
-        yarn run release-win32
-        yarn run release-win-arm64
+        npm run sync -- disableUpdate
+        npm run release-win32
+        npm run release-win-arm64
     - name: Build for Windows (x64)
       env:
         CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
         CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
-      shell: powershell #The default shell for Windows
+      shell: powershell
       run: |
         #Enable auto-update again
-        yarn run sync
-        yarn run release-win
+        npm run sync
+        npm run release-win
     - name: Build unpacked Windows x64 (for zip portable)
       shell: powershell
       run: |
-        yarn run sync disableUpdate
-        yarn run electron-builder --win --x64 --dir
+        npm run sync -- disableUpdate
+        npx electron-builder --win --x64 --dir
 
     - name: Zip unpacked x64 build
       shell: powershell
@@ -83,11 +82,11 @@ jobs:
         7z a "draw.io-$version-windows.zip" ".\win-unpacked\*"
 
     - name: Build for Windows (APPX)
-      shell: powershell #The default shell for Windows
+      shell: powershell
       run: |
         #Disable auto-update for appx also
-        yarn run sync disableUpdate
-        yarn run release-appx
+        npm run sync -- disableUpdate
+        npm run release-appx
 
     - name: Install GitHub CLI
       shell: powershell
@@ -102,4 +101,3 @@ jobs:
       run: |
         $version = "${{ github.ref }}" -replace 'refs/tags/v', ''
         gh release upload "v$version" "dist/draw.io-$version-windows.zip" --clobber
-

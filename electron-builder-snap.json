@@ -1,6 +1,6 @@
 {
   "appId": "com.jgraph.drawio.desktop",
-  "copyright": "Copyright 2017-2025 draw.io",
+  "copyright": "Copyright 2017-2026 draw.io Ltd",
   "asar": true,
   "files": [
     "**/*",
@@ -16,6 +16,11 @@
     "category": "Graphics",
     "maintainer": "draw.io <snap@draw.io>",
     "icon": "./build",
+    "desktop": {
+      "entry": {
+        "StartupWMClass": "draw.io"
+      }
+    },
     "target": [
       "snap"
     ]

@@ -1,6 +1,6 @@
 {
   "name": "draw.io",
-  "version": "29.0.3",
+  "version": "29.3.0",
   "description": "draw.io desktop",
   "exports": "./src/main/electron.js",
   "type": "module",
@@ -42,7 +42,7 @@
     "electron-context-menu": "^4.1.0",
     "electron-log": "^5.4.3",
     "electron-progressbar": "^2.2.1",
-    "electron-store": "^10.1.0",
+    "electron-store": "^11.0.2",
     "electron-updater": "^6.6.8",
     "tslib": "^2.8.1"
   },
