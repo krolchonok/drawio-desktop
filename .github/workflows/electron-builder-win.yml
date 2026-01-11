@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -50,9 +51,6 @@ jobs:
         git config --global url."https://github.com/".insteadOf "git@github.com:"
         npm ci
     - name: Build for Windows (x32 & arm64)
-      env:
-        CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
-        CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
       shell: powershell
       run: |
         #Disable auto-update and build 32bit/arm64 first such that latest.yml is for 64bit only (64bit will overwrite 32bit one)
@@ -60,9 +58,6 @@ jobs:
         npm run release-win32
         npm run release-win-arm64
     - name: Build for Windows (x64)
-      env:
-        CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
-        CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
       shell: powershell
       run: |
         #Enable auto-update again
@@ -101,3 +96,13 @@ jobs:
       run: |
         $version = "${{ github.ref }}" -replace 'refs/tags/v', ''
         gh release upload "v$version" "dist/draw.io-$version-windows.zip" --clobber
+
+    - name: Upload installers to GitHub Release
+      shell: powershell
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        $version = "${{ github.ref }}" -replace 'refs/tags/v', ''
+        gh release upload "v$version" "dist/draw.io-$version-windows-installer.exe" --clobber
+        gh release upload "v$version" "dist/draw.io-$version.msi" --clobber
+        gh release upload "v$version" "dist/draw.io-$version.appx" --clobber
