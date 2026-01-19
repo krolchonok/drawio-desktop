@@ -34,7 +34,9 @@ jobs:
         git fetch origin $ref --no-tags
         $tmp=$tmp -replace 'refs/',''
         git checkout $tmp -b tmp-deploy
-        Copy-Item -Path "src\main\webapp\js\*.min.js"  -Destination "..\drawio\src\main\webapp\js\"
+        Get-ChildItem -Path "src\main\webapp\js\*. min.js" | Where-Object { 
+            -not (Test-Path ". .\drawio\src\main\webapp\js\$($_.Name)") 
+        } | Copy-Item -Destination "..\drawio\src\main\webapp\js\" -Force
         cd ..
         Remove-Item 'drawio' -Recurse -Force
         cd drawio
