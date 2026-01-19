@@ -22,7 +22,7 @@ jobs:
       with:
         repository: krolchonok/drawio
         token: ${{ secrets.GITHUB_TOKEN }}
-        ref: release
+        ref: dev
         path: drawio
         submodules: false
     - name: Get drawio Tag & Submodules
