@@ -30,19 +30,18 @@ jobs:
         cd drawio
         # Get the current build tag from draw.io
         $tmp=$Env:GH_REF -replace '/v','/diagramly-' -replace '[.]','_'
-        $ref=$tmp+':'+$tmp
+        $ref=$tmp+': '+$tmp
         git fetch origin $ref --no-tags
         $tmp=$tmp -replace 'refs/',''
         git checkout $tmp -b tmp-deploy
         Get-ChildItem -Path "src\main\webapp\js\*. min.js" | Where-Object { 
-            -not (Test-Path ". .\drawio\src\main\webapp\js\$($_.Name)") 
-        } | Copy-Item -Destination "..\drawio\src\main\webapp\js\" -Force
-        cd ..
-        Remove-Item 'drawio' -Recurse -Force
-        cd drawio
-        Remove-Item 'docs','etc','src\main\java','src\main\webapp\connect','src\main\webapp\service-worker*','src\main\webapp\workbox-*' -Recurse -Force
+            -not (Test-Path ".\src\main\webapp\js\$($_.Name)") 
+        } | Copy-Item -Destination "src\main\webapp\js\" -Force
+        # Удаляем ненужные файлы и директории (находясь внутри drawio)
+        Remove-Item 'docs','etc','src\main\java','src\main\webapp\connect','src\main\webapp\service-worker*','src\main\webapp\workbox-*' -Recurse -Force -ErrorAction SilentlyContinue
         cd src\main\webapp\js
-        Remove-Item 'atlas-viewer.min.js','atlas.min.js','cryptojs','deflate','dropbox','embed*','freehand','integrate.min.js','jquery','jszip','mermaid','onedrive','orgchart','reader.min.js','rough','sanitizer','shapes.min.js','simplepeer','spin','viewer-static.min.js','viewer.min.js'  -Recurse -Force
+        Remove-Item 'atlas-viewer.min.js','atlas. min.js','cryptojs','deflate','dropbox','embed*','freehand','integrate. min.js','jquery','jszip','mermaid','onedrive','orgchart','reader. min.js','rough','spin*','toolbar-icons.xml' -Recurse -Force -ErrorAction SilentlyContinue
+        cd . .\..\. .\.. 
     - name: Installing Node
       uses: actions/setup-node@v4
       with:
