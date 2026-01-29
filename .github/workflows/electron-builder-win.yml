@@ -4,7 +4,6 @@ on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch:
 
 jobs:
   build:
@@ -17,31 +16,30 @@ jobs:
       uses: actions/checkout@v4
       with:
         submodules: true
-    - name: Checkout drawio
+    - name: Checkout drawio-dev
       uses: actions/checkout@v4
       with:
-        repository: krolchonok/drawio
-        token: ${{ secrets.GITHUB_TOKEN }}
-        ref: dev
-        path: drawio
+        repository: jgraph/drawio-dev
+        token: ${{ secrets.GH_TOKEN }}
+        ref: release
+        path: drawio-dev
         submodules: false
     - name: Get drawio Tag & Submodules
       run: |
-        cd drawio
+        cd drawio-dev
         # Get the current build tag from draw.io
         $tmp=$Env:GH_REF -replace '/v','/diagramly-' -replace '[.]','_'
-        $ref=$tmp+': '+$tmp
+        $ref=$tmp+':'+$tmp
         git fetch origin $ref --no-tags
         $tmp=$tmp -replace 'refs/',''
         git checkout $tmp -b tmp-deploy
-        Get-ChildItem -Path "src\main\webapp\js\*. min.js" | Where-Object { 
-            -not (Test-Path ".\src\main\webapp\js\$($_.Name)") 
-        } | Copy-Item -Destination "src\main\webapp\js\" -Force
-        # Удаляем ненужные файлы и директории (находясь внутри drawio)
-        Remove-Item 'docs','etc','src\main\java','src\main\webapp\connect','src\main\webapp\service-worker*','src\main\webapp\workbox-*' -Recurse -Force -ErrorAction SilentlyContinue
+        Copy-Item -Path "src\main\webapp\js\*.min.js"  -Destination "..\drawio\src\main\webapp\js\"
+        cd ..
+        Remove-Item 'drawio-dev' -Recurse -Force
+        cd drawio
+        Remove-Item 'docs','etc','src\main\java','src\main\webapp\connect','src\main\webapp\service-worker*','src\main\webapp\workbox-*' -Recurse -Force
         cd src\main\webapp\js
-        Remove-Item 'atlas-viewer.min.js','atlas. min.js','cryptojs','deflate','dropbox','embed*','freehand','integrate. min.js','jquery','jszip','mermaid','onedrive','orgchart','reader. min.js','rough','spin*','toolbar-icons.xml' -Recurse -Force -ErrorAction SilentlyContinue
-        cd . .\..\. .\.. 
+        Remove-Item 'atlas-viewer.min.js','atlas.min.js','cryptojs','deflate','dropbox','embed*','freehand','integrate.min.js','jquery','jszip','mermaid','onedrive','orgchart','reader.min.js','rough','sanitizer','simplepeer','spin','viewer-static.min.js','viewer.min.js'  -Recurse -Force
     - name: Installing Node
       uses: actions/setup-node@v4
       with:
@@ -52,6 +50,9 @@ jobs:
         git config --global url."https://github.com/".insteadOf "git@github.com:"
         npm ci
     - name: Build for Windows (x32 & arm64)
+      env:
+        CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
+        CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
       shell: powershell
       run: |
         #Disable auto-update and build 32bit/arm64 first such that latest.yml is for 64bit only (64bit will overwrite 32bit one)
@@ -59,6 +60,9 @@ jobs:
         npm run release-win32
         npm run release-win-arm64
     - name: Build for Windows (x64)
+      env:
+        CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
+        CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
       shell: powershell
       run: |
         #Enable auto-update again
@@ -97,13 +101,3 @@ jobs:
       run: |
         $version = "${{ github.ref }}" -replace 'refs/tags/v', ''
         gh release upload "v$version" "dist/draw.io-$version-windows.zip" --clobber
-
-    - name: Upload installers to GitHub Release
-      shell: powershell
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        $version = "${{ github.ref }}" -replace 'refs/tags/v', ''
-        gh release upload "v$version" "dist/draw.io-$version-windows-installer.exe" --clobber
-        gh release upload "v$version" "dist/draw.io-$version.msi" --clobber
-        gh release upload "v$version" "dist/draw.io-$version.appx" --clobber
