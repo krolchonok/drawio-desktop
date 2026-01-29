@@ -1,6 +1,6 @@
 {
   "name": "draw.io",
-  "version": "29.3.0",
+  "version": "29.3.6",
   "description": "draw.io desktop",
   "exports": "./src/main/electron.js",
   "type": "module",
@@ -40,19 +40,19 @@
     "compression": "^1.8.1",
     "crc": "^4.3.2",
     "buffer": "^6.0.3",
-    "electron-context-menu": "^4.1.0",
+    "electron-context-menu": "^4.1.1",
     "electron-log": "^5.4.3",
     "electron-progressbar": "^2.2.1",
     "electron-store": "^11.0.2",
-    "electron-updater": "^6.6.8",
+    "electron-updater": "^6.7.3",
     "tslib": "^2.8.1"
   },
   "devDependencies": {
     "@electron/fuses": "^1.8.0",
-    "@electron/notarize": "^3.1.0",
+    "@electron/notarize": "^3.1.1",
     "dotenv": "^16.6.1",
-    "electron": "^38.7.0",
-    "electron-builder": "^26.0.20",
+    "electron": "^38.8.0",
+    "electron-builder": "^26.4.1",
     "sumchecker": "^3.0.1"
   }
 }
