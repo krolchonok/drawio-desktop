@@ -1592,9 +1592,17 @@ async function mergePdfs(pdfFiles, xml)
 
 		for (var i = 0; i < pdfFiles.length; i++)
 		{
-			const pdfFile = await PDFDocument.load(pdfFiles[i].buffer);
-			const pages = await pdfDoc.copyPages(pdfFile, pdfFile.getPageIndices());
-			pages.forEach(p => pdfDoc.addPage(p));
+			try
+			{
+				const pdfFile = await PDFDocument.load(pdfFiles[i].buffer);
+				const pages = await pdfDoc.copyPages(pdfFile, pdfFile.getPageIndices());
+				pages.forEach(p => pdfDoc.addPage(p));
+			}
+			catch (innerError)
+			{
+				log.error(`Failed to load PDF part ${i}:`, innerError);
+				throw new Error(`Failed to process page ${i+1}. The file may be corrupt.`);
+			}
 		}
 
 		const pdfBytes = await pdfDoc.save();
