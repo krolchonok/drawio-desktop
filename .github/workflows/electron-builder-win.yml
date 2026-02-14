@@ -8,43 +8,19 @@ jobs:
     runs-on: windows-latest
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      GH_REF: ${{ github.ref }}
     steps:
     - name: Checkout reposistory
       uses: actions/checkout@v4
       with:
         submodules: true
-    - name: Checkout drawio-dev
-      uses: actions/checkout@v4
-      with:
-        repository: jgraph/drawio-dev
-        token: ${{ github.token }}
-        ref: release
-        path: drawio-dev
-        submodules: false
-    - name: Get drawio Tag & Submodules
+    - name: Prepare drawio sources
       shell: powershell
       run: |
         $repoRoot = $Env:GITHUB_WORKSPACE
-        $drawioDevPath = Join-Path $repoRoot 'drawio-dev'
         $drawioPath = Join-Path $repoRoot 'drawio'
 
-        Set-Location $drawioDevPath
-
-        # Build draw.io ref only for tag builds; for branch/workflow_dispatch fallback to release.
-        if ($Env:GH_REF -match '^refs/tags/v') {
-          $drawioRef = $Env:GH_REF -replace '/v','/diagramly-' -replace '[.]','_'
-        } else {
-          $drawioRef = 'refs/heads/release'
-        }
-
-        git fetch origin "$drawioRef" --no-tags
-        git checkout -B tmp-deploy FETCH_HEAD
-
-        Copy-Item -Path "src\main\webapp\js\*.min.js" -Destination (Join-Path $drawioPath "src\main\webapp\js\")
-
         Set-Location $repoRoot
-        Remove-Item $drawioDevPath -Recurse -Force
+        Remove-Item 'drawio-dev' -Recurse -Force -ErrorAction SilentlyContinue
 
         Set-Location $drawioPath
         Remove-Item 'docs','etc','src\main\java','src\main\webapp\connect','src\main\webapp\service-worker*','src\main\webapp\workbox-*' -Recurse -Force

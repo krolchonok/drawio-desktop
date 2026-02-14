@@ -21,35 +21,13 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAP_TOKEN }}
       OS_NAME: ${{ matrix.os }}
-      GH_REF: ${{ github.ref }}
     steps:
     - name: Checkout reposistory
       uses: actions/checkout@v4
       with:
         submodules: true
-    - name: Checkout drawio-dev
-      uses: actions/checkout@v4
-      with:
-        repository: jgraph/drawio-dev
-        token: ${{ github.token }}
-        ref: release
-        path: drawio-dev
-        submodules: false
-    - name: Get drawio Tag & Submodules
+    - name: Prepare drawio sources
       run: |
-        repo_root="$PWD"
-        cd drawio-dev
-        # Build draw.io ref only for tag builds; for branch/workflow_dispatch fallback to release.
-        if [[ "$GH_REF" == refs/tags/v* ]]; then
-          drawio_ref="${GH_REF/\/v/\/diagramly-}"
-          drawio_ref="${drawio_ref//\./_}"
-        else
-          drawio_ref="refs/heads/release"
-        fi
-        git fetch origin "$drawio_ref" --no-tags
-        git checkout -B tmp-deploy FETCH_HEAD
-        cp src/main/webapp/js/*.min.js "$repo_root/drawio/src/main/webapp/js/"
-        cd "$repo_root"
         rm -rf drawio-dev
         cd drawio
         rm -rf docs etc src/main/java src/main/webapp/connect src/main/webapp/service-worker* src/main/webapp/workbox-*
