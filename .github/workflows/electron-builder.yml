@@ -40,15 +40,19 @@ jobs:
         submodules: false
     - name: Get drawio Tag & Submodules
       run: |
+        repo_root="$PWD"
         cd drawio-dev
-        # Get the current build tag from draw.io
-        export tmp1=${GH_REF/refs\//}
-        export tmp2=${tmp1/\/v/\/diagramly-}
-        export tmp3=${tmp2//\./_}
-        git fetch origin refs/$tmp3:refs/$tmp3 --no-tags
-        git checkout $tmp3 -b tmp-deploy
-        cp src/main/webapp/js/*.min.js ../drawio/src/main/webapp/js/
-        cd ..
+        # Build draw.io ref only for tag builds; for branch/workflow_dispatch fallback to release.
+        if [[ "$GH_REF" == refs/tags/v* ]]; then
+          drawio_ref="${GH_REF/\/v/\/diagramly-}"
+          drawio_ref="${drawio_ref//\./_}"
+        else
+          drawio_ref="refs/heads/release"
+        fi
+        git fetch origin "$drawio_ref" --no-tags
+        git checkout -B tmp-deploy FETCH_HEAD
+        cp src/main/webapp/js/*.min.js "$repo_root/drawio/src/main/webapp/js/"
+        cd "$repo_root"
         rm -rf drawio-dev
         cd drawio
         rm -rf docs etc src/main/java src/main/webapp/connect src/main/webapp/service-worker* src/main/webapp/workbox-*

@@ -25,21 +25,33 @@ jobs:
         path: drawio-dev
         submodules: false
     - name: Get drawio Tag & Submodules
+      shell: powershell
       run: |
-        cd drawio-dev
-        # Get the current build tag from draw.io
-        $tmp=$Env:GH_REF -replace '/v','/diagramly-' -replace '[.]','_'
-        $ref=$tmp+':'+$tmp
-        git fetch origin $ref --no-tags
-        $tmp=$tmp -replace 'refs/',''
-        git checkout $tmp -b tmp-deploy
-        Copy-Item -Path "src\main\webapp\js\*.min.js"  -Destination "..\drawio\src\main\webapp\js\"
-        cd ..
-        Remove-Item 'drawio-dev' -Recurse -Force
-        cd drawio
+        $repoRoot = $Env:GITHUB_WORKSPACE
+        $drawioDevPath = Join-Path $repoRoot 'drawio-dev'
+        $drawioPath = Join-Path $repoRoot 'drawio'
+
+        Set-Location $drawioDevPath
+
+        # Build draw.io ref only for tag builds; for branch/workflow_dispatch fallback to release.
+        if ($Env:GH_REF -match '^refs/tags/v') {
+          $drawioRef = $Env:GH_REF -replace '/v','/diagramly-' -replace '[.]','_'
+        } else {
+          $drawioRef = 'refs/heads/release'
+        }
+
+        git fetch origin "$drawioRef" --no-tags
+        git checkout -B tmp-deploy FETCH_HEAD
+
+        Copy-Item -Path "src\main\webapp\js\*.min.js" -Destination (Join-Path $drawioPath "src\main\webapp\js\")
+
+        Set-Location $repoRoot
+        Remove-Item $drawioDevPath -Recurse -Force
+
+        Set-Location $drawioPath
         Remove-Item 'docs','etc','src\main\java','src\main\webapp\connect','src\main\webapp\service-worker*','src\main\webapp\workbox-*' -Recurse -Force
-        cd src\main\webapp\js
-        Remove-Item 'atlas-viewer.min.js','atlas.min.js','cryptojs','deflate','dropbox','embed*','freehand','integrate.min.js','jquery','jszip','mermaid','onedrive','orgchart','reader.min.js','rough','sanitizer','simplepeer','spin','viewer-static.min.js','viewer.min.js'  -Recurse -Force
+        Set-Location (Join-Path $drawioPath 'src\main\webapp\js')
+        Remove-Item 'atlas-viewer.min.js','atlas.min.js','cryptojs','deflate','dropbox','embed*','freehand','integrate.min.js','jquery','jszip','mermaid','onedrive','orgchart','reader.min.js','rough','sanitizer','simplepeer','spin','viewer-static.min.js','viewer.min.js' -Recurse -Force
     - name: Installing Node
       uses: actions/setup-node@v4
       with:
