@@ -1,6 +1,9 @@
 name: Electron Builder CI (WIN)
 
 on:
+  push:
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 jobs:
@@ -12,7 +15,7 @@ jobs:
     - name: Checkout reposistory
       uses: actions/checkout@v4
       with:
-        submodules: true
+        submodules: recursive
     - name: Prepare drawio sources
       shell: powershell
       run: |
@@ -29,7 +32,7 @@ jobs:
     - name: Installing Node
       uses: actions/setup-node@v4
       with:
-        node-version: 24
+        node-version: 20
     - name: Prepare for Windows Build
       shell: powershell
       run: |
@@ -58,13 +61,16 @@ jobs:
       shell: powershell
       run: |
         npm run sync -- disableUpdate
-        npx electron-builder --win --x64 --dir
+        npx electron-builder --config electron-builder-win.json --win --x64 --dir --publish never
 
     - name: Zip unpacked x64 build
       shell: powershell
       run: |
         $version = "${{ github.ref }}" -replace 'refs/tags/v', ''
-        cd dist
+        if ([string]::IsNullOrWhiteSpace($version)) {
+          $version = (Get-Content drawio\VERSION -Raw).Trim()
+        }
+        cd build
         7z a "draw.io-$version-windows.zip" ".\win-unpacked\*"
 
     - name: Build for Windows (APPX)
@@ -86,4 +92,7 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         $version = "${{ github.ref }}" -replace 'refs/tags/v', ''
-        gh release upload "v$version" "dist/draw.io-$version-windows.zip" --clobber
+        if ([string]::IsNullOrWhiteSpace($version)) {
+          $version = (Get-Content drawio\VERSION -Raw).Trim()
+        }
+        gh release upload "v$version" "build/draw.io-$version-windows.zip" --clobber

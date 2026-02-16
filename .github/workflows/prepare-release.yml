@@ -22,7 +22,7 @@ on:
         default: false
 
 env:
-  NODE_VERSION: '24'
+  NODE_VERSION: '20'
 
 jobs:
   prepare-release:

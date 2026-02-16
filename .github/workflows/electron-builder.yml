@@ -1,6 +1,9 @@
 name: Electron Builder CI
 
 on:
+  push:
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 jobs:
@@ -25,7 +28,7 @@ jobs:
     - name: Checkout reposistory
       uses: actions/checkout@v4
       with:
-        submodules: true
+        submodules: recursive
     - name: Prepare drawio sources
       run: |
         rm -rf drawio-dev
@@ -36,7 +39,7 @@ jobs:
     - name: Installing Node
       uses: actions/setup-node@v4
       with:
-        node-version: 24
+        node-version: 20
     - name: Build for ${{ matrix.os}}
       run: |
         if [ "$OS_NAME" = "ubuntu-latest" ]; then sudo apt-get update && sudo apt-get install -y icnsutils graphicsmagick xz-utils rpm; fi

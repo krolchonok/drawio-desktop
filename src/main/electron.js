@@ -134,9 +134,22 @@ catch(e)
 //app.enableSandbox(); // This maybe the reason snap stopped working
 
 // Only allow request from the app code itself
+function normalizeFileUrl(inputUrl)
+{
+	try
+	{
+		const normalized = decodeURIComponent(inputUrl).split('#')[0].split('?')[0];
+		return normalized.replace(/\/.\:\//, str => str.toUpperCase());
+	}
+	catch (e)
+	{
+		return inputUrl;
+	}
+}
+
 function validateSender (frame) 
 {
-	return frame.url.replace(/\/.\:\//, str => str.toUpperCase()).startsWith(codeUrl);
+	return normalizeFileUrl(frame.url).startsWith(normalizeFileUrl(codeUrl));
 }
 
 function isWithinDisplayBounds(pos) 
@@ -390,11 +403,13 @@ app.whenReady().then(() =>
 	// Enforce loading file only from our app directory
 	session.defaultSession.webRequest.onBeforeRequest({urls: ['file://*']}, (details, callback) =>
 	{
-		const url = details.url.replace(/\/.\:\//, str => str.toUpperCase());
+		const reqUrl = normalizeFileUrl(details.url);
+		const appCodeUrl = normalizeFileUrl(codeUrl);
+		const pluginsUrl = normalizeFileUrl(pluginsCodeUrl);
 
-		if (!url.startsWith(codeUrl) && (!isPluginsEnabled() || (isPluginsEnabled() && !url.startsWith(pluginsCodeUrl))))
+		if (!reqUrl.startsWith(appCodeUrl) && (!isPluginsEnabled() || (isPluginsEnabled() && !reqUrl.startsWith(pluginsUrl))))
 		{
-			console.log('Blocked loading file from ' + details.url, url, codeUrl, pluginsCodeUrl);
+			console.log('Blocked loading file from ' + details.url, reqUrl, appCodeUrl, pluginsUrl);
 			callback({cancel: true});
 		}
 		else
