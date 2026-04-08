@@ -47,6 +47,9 @@ jobs:
         npm ci
         if [ "$OS_NAME" = "ubuntu-latest" ]; then sed -ie 's/"asar": true,/"asar": true,\n"productName": "drawio",/' electron-builder-linux-mac.json; fi 
         npm run sync
+        if [ -z "$CSC_LINK" ]; then
+          export CSC_IDENTITY_AUTO_DISCOVERY=false
+        fi
         npm run release-linux
     - name: Build for Snap
       if: ${{ matrix.os == 'ubuntu-latest' }}

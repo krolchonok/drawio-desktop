@@ -21,14 +21,15 @@ jobs:
       run: |
         $repoRoot = $Env:GITHUB_WORKSPACE
         $drawioPath = Join-Path $repoRoot 'drawio'
+        $ErrorActionPreference = 'Stop'
 
         Set-Location $repoRoot
         Remove-Item 'drawio-dev' -Recurse -Force -ErrorAction SilentlyContinue
 
         Set-Location $drawioPath
-        Remove-Item 'docs','etc','src\main\java','src\main\webapp\connect','src\main\webapp\service-worker*','src\main\webapp\workbox-*' -Recurse -Force
+        Remove-Item 'docs','etc','src\main\java','src\main\webapp\connect','src\main\webapp\service-worker*','src\main\webapp\workbox-*' -Recurse -Force -ErrorAction SilentlyContinue
         Set-Location (Join-Path $drawioPath 'src\main\webapp\js')
-        Remove-Item 'atlas-viewer.min.js','atlas.min.js','cryptojs','deflate','dropbox','embed*','freehand','integrate.min.js','jquery','jszip','mermaid','onedrive','orgchart','reader.min.js','rough','sanitizer','simplepeer','spin','viewer-static.min.js','viewer.min.js' -Recurse -Force
+        Remove-Item 'atlas-viewer.min.js','atlas.min.js','cryptojs','deflate','dropbox','embed*','freehand','integrate.min.js','jquery','jszip','mermaid','onedrive','orgchart','reader.min.js','rough','sanitizer','simplepeer','spin','viewer-static.min.js','viewer.min.js' -Recurse -Force -ErrorAction SilentlyContinue
     - name: Installing Node
       uses: actions/setup-node@v4
       with:
