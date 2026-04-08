@@ -46,8 +46,18 @@ if (-not (Test-Path "package.json")) {
     throw "Run this script from the drawio-desktop repo root."
 }
 
-if (-not (Test-Path "drawio\VERSION")) {
-    throw "drawio\VERSION not found."
+$drawioVersionPath = Join-Path "drawio" "VERSION"
+if (-not (Test-Path $drawioVersionPath)) {
+    $hasDrawioSubmodule = $false
+    if (Test-Path ".gitmodules") {
+        $hasDrawioSubmodule = (Select-String -Path ".gitmodules" -Pattern 'path\s*=\s*drawio' -Quiet)
+    }
+
+    if ($hasDrawioSubmodule) {
+        throw "drawio\VERSION not found. The drawio submodule looks uninitialized. Run: git submodule update --init --recursive"
+    }
+
+    throw "drawio\VERSION not found at '$drawioVersionPath'."
 }
 
 $targets = [ordered]@{
@@ -105,7 +115,7 @@ if (-not $selectedTarget) {
     throw "Unknown target '$Target'. Valid keys: $((($targets.Values | ForEach-Object { $_.Key }) -join ', '))"
 }
 
-$currentVersion = (Get-Content "drawio\VERSION" -Raw).Trim()
+$currentVersion = (Get-Content $drawioVersionPath -Raw).Trim()
 if (-not $Version) {
     Write-Host "Current drawio version: $currentVersion"
     if (Read-YesNo "Change version?") {
@@ -118,7 +128,7 @@ if ($Version) {
         throw "Version cannot be empty."
     }
 
-    Set-Content "drawio\VERSION" $Version -NoNewline
+    Set-Content $drawioVersionPath $Version -NoNewline
     Write-Host "Version updated: $Version"
 }
 
